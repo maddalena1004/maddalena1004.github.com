@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: osx | maddalena's log]]></title>
+  <link href="http://maddalena1004.github.io/blog/categories/osx/atom.xml" rel="self"/>
+  <link href="http://maddalena1004.github.io/"/>
+  <updated>2013-07-31T21:47:44+09:00</updated>
+  <id>http://maddalena1004.github.io/</id>
+  <author>
+    <name><![CDATA[maddalena]]></name>
+    <email><![CDATA[maddalena1004@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[How to repair orange(external) disk icon in Mountain Lion]]></title>
+    <link href="http://maddalena1004.github.io/blog/2013/07/31/how-to-repair-orange-external-disk-icon-in-mountain-lion/"/>
+    <updated>2013-07-31T21:00:00+09:00</updated>
+    <id>http://maddalena1004.github.io/blog/2013/07/31/how-to-repair-orange-external-disk-icon-in-mountain-lion</id>
+    <content type="html"><![CDATA[<h2>Use IOAHCIBlockStorageInjector.kext</h2>
+
+<p>Copy to /System/Library/Extensions/IOAHCIFamily.kext/Contents/Plugins</p>
+
+<pre><code>$ cd /System/Library/Extensions
+$ sudo cp -r IOAHCIBlockStorageInjector.kext /System/Library/Extensions/IOAHCIFamily.kext/Contents/Plugins/IOAHCIBlockStorageInjector.kext
+$ sudo chmod 755 IOAHCIFamily.kext
+$ sudo chown -R root:wheel IOAHCIFamily.kext
+$ rm -rf /System/Library/Caches/com.apple.kext.caches/Startup/kernelcache
+$ reboot
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[How to make Mountain Lion OSX USB image from Ubuntu]]></title>
+    <link href="http://maddalena1004.github.io/blog/2013/07/27/how-to-make-mountain-lion-osx-usb-image-from-ubuntu/"/>
+    <updated>2013-07-27T00:00:00+09:00</updated>
+    <id>http://maddalena1004.github.io/blog/2013/07/27/how-to-make-mountain-lion-osx-usb-image-from-ubuntu</id>
+    <content type="html"><![CDATA[<p>Included file 'JB/setup' not found in _includes directory</p>
+
+<p>This is the post about make an image from <a href="http://ubuntu.com">Ubuntu linux</a>.
+If you don&rsquo;t have any osx machine, This guide should be useful.</p>
+
+<h2>Requirements</h2>
+
+<ul>
+<li><em>Ubuntu Linux</em></li>
+<li><em>Mountain Lion OSX Retail Image</em></li>
+<li><em>8GB USB stick</em></li>
+</ul>
+
+
+<h2>Converting to img from dmg and mount images.</h2>
+
+<p>You can installing these packages : dmg2img, hfsprogs, hfsplus, hfsutils.</p>
+
+<pre><code>$ dmg2img InstallESD.dmg InstallESD.img
+$ losetup -o 32768 /dev/loop0 InstallESD.img
+$ mount -t hfsplus /dev/loop0 ~/target/InstallESD/
+$ cp ~/target/InstallESD/BaseSystem.dmg .
+$ dmg2img BaseSystem.dmg BaseSystem.img
+$ losetup -o 32768 /dev/loop1 BaseSystem.img
+$ mount -t hfsplus /dev/loop1 ~/target/BaseSystem/
+</code></pre>
+
+<h2>Create USB partition</h2>
+
+<p>please check your USB device, here is /dev/sdc</p>
+
+<pre><code>$ sudo umount /dev/sdc1
+$ sudo parted -s /dev/sdc mktable gpt
+$ sudo parted /dev/sdc mkpart primary hfs 1 5500 &lt;== 5.5GB
+$ sudo mkfs.hfsplus -v ML /dev/sdc1
+$ sudo mount /dev/sdc1 ~/target/USB/
+</code></pre>
+
+<h2>Copying the files</h2>
+
+<pre><code>$ sudo rsync -Pah ~/target/BaseSystem/. ~/target/USB/
+$ sudo rm -rf ~/target/USB/System/Installation/Packages
+$ sudo rsync -Pah ~/target/InstallESD/Packages ~/target/USB/Installation/Packages
+$ sudo cp -a ~/target/InstallESD/mach_kernel ~/target/USB/
+</code></pre>
+
+<h2>Make Bootable USB</h2>
+
+<p>You can find chameleon package, copy the 3 files (boot, boot0, boo1h)</p>
+
+<pre><code>$ sudo cp -a boot ~/target/USB
+$ sudo dd if=boot0 of=/dev/sdc bs=440 count=1
+$ sudo dd if=boot1h of=/dev/sdc1
+$ printf '\x80' | sudo dd of=/dev/sdc bs=1 seek=446
+</code></pre>
+
+<p><em>finished</em></p>
+]]></content>
+  </entry>
+  
+</feed>
